@@ -12,7 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.database       import get_db
 from backend.core.config         import settings
+from backend.core.auth           import get_current_brand, optional_auth
 from backend.models.camera       import Camera, DEFAULT_FEATURES
+from backend.models.brand        import Brand
 from backend.models.attendance   import Attendance
 from backend.services.camera_service import camera_service
 
@@ -29,6 +31,7 @@ class CameraCreate(BaseModel):
     location: str  = ""
     enabled:  bool = True
     features: Optional[dict] = None
+    brand_id: Optional[str]  = None
 
 class CameraUpdate(BaseModel):
     name:     Optional[str]  = None
@@ -36,6 +39,7 @@ class CameraUpdate(BaseModel):
     location: Optional[str]  = None
     enabled:  Optional[bool] = None
     features: Optional[dict] = None
+    brand_id: Optional[str]  = None
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -48,14 +52,16 @@ def _parse_features(c: Camera) -> dict:
 
 def _cam_dict(c: Camera) -> dict:
     return {
-        "id":       c.id,
-        "name":     c.name,
-        "url":      c.url,
-        "type":     c.type,
-        "location": c.location,
-        "enabled":  c.enabled,
-        "online":   camera_service.status().get(c.id, False),
-        "features": _parse_features(c),
+        "id":        c.id,
+        "name":      c.name,
+        "url":       c.url,
+        "type":      c.type,
+        "location":  c.location,
+        "enabled":   c.enabled,
+        "online":    camera_service.status().get(c.id, False),
+        "features":  _parse_features(c),
+        "brand_id":  c.brand_id,
+        "brand_name": c.brand.name if c.brand else None,
     }
 
 def _camera_base_url(url: str) -> tuple[str, tuple[str, str]]:
@@ -69,8 +75,15 @@ def _camera_base_url(url: str) -> tuple[str, tuple[str, str]]:
 # ── CRUD endpoints ─────────────────────────────────────────────────────────────
 
 @router.get("")
-async def list_cameras(db: AsyncSession = Depends(get_db)):
-    rows = await db.execute(select(Camera))
+async def list_cameras(
+    db:    AsyncSession = Depends(get_db),
+    token: Optional[dict] = Depends(optional_auth),
+):
+    """Kameralar ro'yxati. Brand login qilgan bo'lsa — faqat o'zining kameralari."""
+    stmt = select(Camera)
+    if token and not token.get("su"):          # brand user, not superuser
+        stmt = stmt.where(Camera.brand_id == token["sub"])
+    rows = await db.execute(stmt)
     return {"cameras": [_cam_dict(c) for c in rows.scalars()]}
 
 

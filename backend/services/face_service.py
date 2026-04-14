@@ -334,10 +334,17 @@ class FaceService:
 
     # ── Snapshot ───────────────────────────────────────────────────────────────
 
-    def save_snapshot(self, frame_bgr: np.ndarray, camera_id: str, suffix: str = "") -> str:
+    def save_snapshot(
+        self,
+        frame_bgr: np.ndarray,
+        camera_id: str,
+        suffix: str = "",
+        brand_name: str = "unassigned",
+    ) -> str:
         today   = datetime.now().strftime("%Y-%m-%d")
         ts      = datetime.now().strftime("%H-%M-%S-%f")[:15]
-        out_dir = settings.CAPTURES_DIR / camera_id / today
+        # Rasm brand papkasiga joylashadi: captures/{brand_name}/{camera_id}/{date}/
+        out_dir = settings.CAPTURES_DIR / brand_name / camera_id / today
         out_dir.mkdir(parents=True, exist_ok=True)
         path = out_dir / f"{ts}{suffix}.jpg"
         cv2.imwrite(str(path), frame_bgr)

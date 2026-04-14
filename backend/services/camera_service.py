@@ -23,9 +23,11 @@ class CameraStream:
     """Bitta kamera uchun stream thread."""
 
     def __init__(self, camera_id: str, url: str, on_detection: Callable,
-                 loop: asyncio.AbstractEventLoop | None = None):
+                 loop: asyncio.AbstractEventLoop | None = None,
+                 brand_name: str = "unassigned"):
         self.camera_id    = camera_id
         self.url          = url
+        self.brand_name   = brand_name
         self.on_detection = on_detection   # async callback
         self._loop        = loop
         self.active       = False
@@ -122,7 +124,7 @@ class CameraStream:
                         self._latest_annotated = abuf.tobytes() if ok2 else None
 
                     if faces:
-                        snapshot = face_service.save_snapshot(frame, self.camera_id)
+                        snapshot = face_service.save_snapshot(frame, self.camera_id, brand_name=self.brand_name)
                         loop = self._loop
                         if loop and loop.is_running():
                             asyncio.run_coroutine_threadsafe(
@@ -150,11 +152,11 @@ class CameraService:
         if self._on_detection_cb:
             await self._on_detection_cb(camera_id, faces, snapshot, jpeg)
 
-    def start_camera(self, camera_id: str, url: str):
+    def start_camera(self, camera_id: str, url: str, brand_name: str = "unassigned"):
         if camera_id in self._streams:
             self._streams[camera_id].stop()
 
-        stream = CameraStream(camera_id, url, self._on_detection, self._loop)
+        stream = CameraStream(camera_id, url, self._on_detection, self._loop, brand_name)
         self._streams[camera_id] = stream
         stream.start()
 

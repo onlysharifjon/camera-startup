@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Kirish — Camera System</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      background:#0a0e1a;
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;font-family:system-ui,sans-serif;
+    }
+    .card{
+      background:#111827;border:1px solid #1f2937;border-radius:16px;
+      padding:48px 40px;width:100%;max-width:400px;
+      box-shadow:0 25px 60px rgba(0,0,0,.5);
+    }
+    .logo{
+      text-align:center;margin-bottom:32px;
+    }
+    .logo-icon{
+      width:64px;height:64px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+      border-radius:14px;display:inline-flex;align-items:center;justify-content:center;
+      font-size:28px;margin-bottom:16px;
+    }
+    h1{color:#f9fafb;font-size:22px;font-weight:700;text-align:center}
+    .sub{color:#6b7280;font-size:13px;text-align:center;margin-top:6px}
+
+    .form-group{margin-bottom:18px}
+    label{display:block;color:#9ca3af;font-size:12px;font-weight:600;
+          text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+    input{
+      width:100%;background:#1f2937;border:1px solid #374151;color:#f9fafb;
+      padding:12px 14px;border-radius:8px;font-size:14px;outline:none;
+      transition:border-color .2s;
+    }
+    input:focus{border-color:#3b82f6}
+    input::placeholder{color:#4b5563}
+
+    .btn{
+      width:100%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+      color:#fff;border:none;padding:13px;border-radius:8px;
+      font-size:15px;font-weight:600;cursor:pointer;
+      transition:opacity .2s;margin-top:8px;
+    }
+    .btn:hover{opacity:.9}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+
+    .error{
+      background:#1f0a0a;border:1px solid #7f1d1d;color:#fca5a5;
+      padding:10px 14px;border-radius:8px;font-size:13px;
+      margin-bottom:16px;display:none;
+    }
+    .footer{color:#374151;font-size:11px;text-align:center;margin-top:24px}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">📷</div>
+    <h1>Camera System</h1>
+    <p class="sub">Tizimga kirish</p>
+  </div>
+
+  <div class="error" id="err"></div>
+
+  <form id="loginForm">
+    <div class="form-group">
+      <label>Foydalanuvchi nomi</label>
+      <input type="text" id="username" placeholder="username" autocomplete="username" required/>
+    </div>
+    <div class="form-group">
+      <label>Parol</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required/>
+    </div>
+    <button type="submit" class="btn" id="submitBtn">Kirish</button>
+  </form>
+
+  <p class="footer">Harbiy kuzatuv tizimi &copy; 2026</p>
+</div>
+
+<script>
+  // Agar token allaqachon bor va to'g'ri bo'lsa — asosiy sahifaga o'tkazish
+  (async () => {
+    const token = localStorage.getItem('cam_token');
+    if (!token) return;
+    try {
+      const r = await fetch('/api/auth/me', {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      if (r.ok) { window.location.replace('/'); }
+    } catch {}
+  })();
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn      = document.getElementById('submitBtn');
+    const errEl    = document.getElementById('err');
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    btn.disabled     = true;
+    btn.textContent  = 'Tekshirilmoqda…';
+    errEl.style.display = 'none';
+
+    try {
+      const res  = await fetch('/api/auth/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errEl.textContent    = data.detail || 'Xato yuz berdi';
+        errEl.style.display  = 'block';
+        return;
+      }
+
+      localStorage.setItem('cam_token', data.access_token);
+      localStorage.setItem('cam_brand', JSON.stringify(data.brand));
+      window.location.replace('/');
+
+    } catch (err) {
+      errEl.textContent   = 'Server bilan aloqa yo'q';
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = 'Kirish';
+    }
+  });
+</script>
+</body>
+</html>

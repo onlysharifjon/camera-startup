@@ -18,7 +18,7 @@ from sqlalchemy import select
 from backend.core.config          import settings
 from backend.core.database        import init_db, AsyncSessionLocal
 from backend.models.camera        import Camera
-from backend.routers              import employees, attendance, cameras, users
+from backend.routers              import employees, attendance, cameras, users, brands
 from backend.services.camera_service     import camera_service
 from backend.services.attendance_service import attendance_service
 from backend.services.face_service       import face_service
@@ -102,12 +102,30 @@ async def lifespan(app: FastAPI):
 
     # Load cameras from DB and start streams
     async with AsyncSessionLocal() as db:
+        # Superuser yaratish (agar mavjud bo'lmasa)
+        from backend.models.brand import Brand as BrandModel
+        from backend.core.auth    import hash_password
+        su = (await db.execute(
+            select(BrandModel).where(BrandModel.is_superuser == True)
+        )).scalar_one_or_none()
+        if not su:
+            su = BrandModel(
+                name          = "SuperAdmin",
+                username      = "admin",
+                password_hash = hash_password("admin123"),
+                is_superuser  = True,
+            )
+            db.add(su)
+            await db.commit()
+            log.info("[AUTH] Superuser created: admin / admin123")
+
         rows = await db.execute(select(Camera).where(Camera.enabled == True))
         for cam in rows.scalars():
+            brand_name = cam.brand.name if cam.brand else "unassigned"
             if cam.type == "v380":
                 camera_service.start_v380_watcher(cam.id)
             else:
-                camera_service.start_camera(cam.id, cam.url)
+                camera_service.start_camera(cam.id, cam.url, brand_name)
 
     # Always start V380 watcher (screenshot folder)
     camera_service.start_v380_watcher("v380-darvoza")
@@ -137,6 +155,7 @@ app.include_router(employees.router, prefix="/api")
 app.include_router(attendance.router, prefix="/api")
 app.include_router(cameras.router,    prefix="/api")
 app.include_router(users.router,      prefix="/api")
+app.include_router(brands.router)
 
 # Captures static files
 app.mount("/captures", StaticFiles(directory=str(settings.CAPTURES_DIR)), name="captures")
@@ -467,3 +486,7 @@ app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 @app.get("/")
 async def serve_frontend():
     return FileResponse(str(FRONTEND_DIR / "index.html"))
+
+@app.get("/login")
+async def serve_login():
+    return FileResponse(str(FRONTEND_DIR / "login.html"))
