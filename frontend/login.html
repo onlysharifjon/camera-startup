@@ -22,8 +22,9 @@
     .logo-icon{
       width:64px;height:64px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);
       border-radius:14px;display:inline-flex;align-items:center;justify-content:center;
-      font-size:28px;margin-bottom:16px;
+      margin-bottom:16px;
     }
+    .logo-icon svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
     h1{color:#f9fafb;font-size:22px;font-weight:700;text-align:center}
     .sub{color:#6b7280;font-size:13px;text-align:center;margin-top:6px}
 
@@ -52,13 +53,14 @@
       padding:10px 14px;border-radius:8px;font-size:13px;
       margin-bottom:16px;display:none;
     }
-    .footer{color:#374151;font-size:11px;text-align:center;margin-top:24px}
   </style>
 </head>
 <body>
 <div class="card">
   <div class="logo">
-    <div class="logo-icon">📷</div>
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </div>
     <h1>Camera System</h1>
     <p class="sub">Tizimga kirish</p>
   </div>
@@ -77,7 +79,6 @@
     <button type="submit" class="btn" id="submitBtn">Kirish</button>
   </form>
 
-  <p class="footer">Harbiy kuzatuv tizimi &copy; 2026</p>
 </div>
 
 <script>
