@@ -1,0 +1,12 @@
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+sqlalchemy[asyncio]>=2.0.0
+aiosqlite>=0.20.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-multipart>=0.0.9
+opencv-python>=4.8.0
+numpy>=1.24.0
+deepface>=0.0.90
+httpx>=0.28.0
+cmake>=3.25.0

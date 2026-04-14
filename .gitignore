@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+.env.local
+*.env
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Model weights (large binary files)
+face_system/models/*.caffemodel
+
+# Face data (sensitive)
+faces_db/
+captures/
+backend/data/faces/
+backend/data/captures/
+
+# Temp files
+face_system/models/test_face.jpg
+face_system/models/test_annotated.jpg
+backend/data/faces/_tmp_recog.jpg
+faces_db/_tmp_face.jpg
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node (if any frontend tooling)
+node_modules/
+
+# Coverage
+.coverage
+htmlcov/

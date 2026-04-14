@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Davomat Tizimi</title>
+  <link rel="stylesheet" href="/static/css/fa/all.min.css" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">◈</span>
+    <span class="brand-name">AttendanceOS</span>
+  </div>
+  <nav class="nav">
+    <a class="nav-item active" data-page="dashboard">
+      <i class="fa-solid fa-chart-pie"></i>
+      Dashboard
+    </a>
+    <a class="nav-item" data-page="live">
+      <i class="fa-solid fa-tower-broadcast"></i>
+      Live Monitor
+    </a>
+    <a class="nav-item" data-page="employees">
+      <i class="fa-solid fa-users"></i>
+      Xodimlar
+    </a>
+    <a class="nav-item" data-page="attendance">
+      <i class="fa-solid fa-calendar-check"></i>
+      Davomat
+    </a>
+    <a class="nav-item" data-page="cameras">
+      <i class="fa-solid fa-video"></i>
+      Kameralar
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <span class="ws-dot" id="wsDot"></span>
+    <span class="ws-label" id="wsLabel">Ulanmoqda…</span>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <h1 class="page-title" id="pageTitle">Dashboard</h1>
+    <div class="topbar-right">
+      <span class="date-label" id="dateLabel"></span>
+    </div>
+  </header>
+
+  <!-- ═══ DASHBOARD ═══════════════════════════════════════════════════════ -->
+  <section class="page active" id="page-dashboard">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-body">
+          <div class="stat-value" id="s-total">–</div>
+          <div class="stat-label">Jami xodim</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="stat-body">
+          <div class="stat-value" id="s-present">–</div>
+          <div class="stat-label">Keldi (bugun)</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
+        <div class="stat-body">
+          <div class="stat-value" id="s-absent">–</div>
+          <div class="stat-label">Kelmadi</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-body">
+          <div class="stat-value" id="s-late">–</div>
+          <div class="stat-label">Kech keldi</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>Bugungi davomat</h2>
+      <span class="badge" id="todayCount">0 ta</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table" id="todayTable">
+        <thead>
+          <tr>
+            <th>Xodim</th>
+            <th>Lavozim</th>
+            <th>Bo'lim</th>
+            <th>Kelish</th>
+            <th>Ketish</th>
+            <th>Ish soat</th>
+            <th>Holat</th>
+          </tr>
+        </thead>
+        <tbody id="todayBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══ LIVE MONITOR ════════════════════════════════════════════════════ -->
+  <section class="page" id="page-live">
+    <div class="live-layout">
+      <div class="live-cameras" id="liveCameras">
+        <div class="empty">Kamera yo'q yoki ulanmagan</div>
+      </div>
+      <div class="live-log">
+        <div class="log-header">
+          <span>Aniqlash jurnali</span>
+          <button class="btn-icon" id="clearLog"><i class="fa-solid fa-trash-can"></i></button>
+        </div>
+        <ul class="log-list" id="logList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ EMPLOYEES ═══════════════════════════════════════════════════════ -->
+  <section class="page" id="page-employees">
+    <div class="toolbar">
+      <button class="btn btn-primary" id="addEmpBtn"><i class="fa-solid fa-user-plus"></i> Xodim qo'shish</button>
+      <input class="input search-input" id="empSearch" placeholder="Qidirish…" />
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>F.I.O</th>
+            <th>Lavozim</th>
+            <th>Bo'lim</th>
+            <th>Kelish vaqti</th>
+            <th>Ketish vaqti</th>
+            <th>Holat</th>
+            <th>Yuz</th>
+            <th>Amallar</th>
+          </tr>
+        </thead>
+        <tbody id="empBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══ ATTENDANCE ══════════════════════════════════════════════════════ -->
+  <section class="page" id="page-attendance">
+    <div class="toolbar">
+      <select class="select" id="histEmp"><option value="">Barcha xodimlar</option></select>
+      <input class="input" type="date" id="histFrom" />
+      <input class="input" type="date" id="histTo" />
+      <button class="btn btn-ghost" id="histFilter"><i class="fa-solid fa-filter"></i> Filtrlash</button>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Sana</th>
+            <th>Xodim</th>
+            <th>Bo'lim</th>
+            <th>Kelish</th>
+            <th>Ketish</th>
+            <th>Ish soat</th>
+            <th>Kech (min)</th>
+            <th>Holat</th>
+            <th>Tahrirlash</th>
+          </tr>
+        </thead>
+        <tbody id="histBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══ CAMERAS ═════════════════════════════════════════════════════════ -->
+  <section class="page" id="page-cameras">
+    <div class="toolbar">
+      <button class="btn btn-primary" id="addCamBtn"><i class="fa-solid fa-video"></i> Kamera qo'shish</button>
+    </div>
+    <div class="camera-cards" id="cameraCards"></div>
+  </section>
+</main>
+
+<!-- ══ MODALS ════════════════════════════════════════════════════════════ -->
+
+<!-- Employee Modal -->
+<div class="overlay" id="empModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="empModalTitle">Xodim qo'shish</h3>
+      <button class="btn-icon close-modal" data-modal="empModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="empId" />
+      <div class="field-group">
+        <label>F.I.O *</label>
+        <input class="input" id="empName" placeholder="Aliyev Alisher Aliyevich" />
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Lavozim</label>
+          <input class="input" id="empPosition" placeholder="Menejer" />
+        </div>
+        <div class="field-group">
+          <label>Bo'lim</label>
+          <input class="input" id="empDept" placeholder="IT" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Kelish vaqti</label>
+          <input class="input" type="time" id="empCheckin" value="09:00" />
+        </div>
+        <div class="field-group">
+          <label>Ketish vaqti</label>
+          <input class="input" type="time" id="empCheckout" value="18:00" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Telefon</label>
+        <input class="input" id="empPhone" placeholder="+998 90 123 45 67" />
+      </div>
+      <!-- Face enroll -->
+      <div class="field-group" id="enrollSection" style="display:none">
+        <label>Yuz rasmi (enroll qilish)</label>
+        <input type="file" class="input" id="empFaceFile" accept="image/*" />
+        <span class="hint">Xodim to'g'ridan-to'g'ri qarab turgan aniq rasm</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost close-modal" data-modal="empModal">Bekor</button>
+      <button class="btn btn-primary" id="saveEmpBtn">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- Camera Modal -->
+<div class="overlay" id="camModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="camModalTitle">Kamera qo'shish</h3>
+      <button class="btn-icon close-modal" data-modal="camModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="camId" />
+      <div class="field-group">
+        <label>Nomi *</label>
+        <input class="input" id="camName" placeholder="Kirish kamerasi" />
+      </div>
+      <div class="field-group">
+        <label>URL *</label>
+        <input class="input" id="camUrl" placeholder="rtsp://192.168.1.x:554/stream" />
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Tur</label>
+          <select class="select" id="camType">
+            <option value="rtsp">RTSP</option>
+            <option value="v380">V380</option>
+            <option value="http">HTTP-MJPEG</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Joylashuv</label>
+          <input class="input" id="camLocation" placeholder="1-qavat, kirish" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost close-modal" data-modal="camModal">Bekor</button>
+      <button class="btn btn-primary" id="saveCamBtn">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- Camera Viewer Modal -->
+<div class="overlay" id="camViewModal">
+  <div class="camview-wrap">
+    <div class="camview-header">
+      <div class="camview-title">
+        <i class="fa-solid fa-video"></i>
+        <span id="cvName">Kamera</span>
+        <span class="badge badge-gray" id="cvLocation"></span>
+        <span class="badge" id="cvOnline"></span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-ghost btn-sm" id="cvFullscreen">
+          <i class="fa-solid fa-expand"></i>
+        </button>
+        <button class="btn-icon close-modal" data-modal="camViewModal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="camview-body">
+      <!-- Stream -->
+      <div class="camview-stream" id="cvStreamWrap">
+        <img id="cvStream" src="" alt="stream" style="width:100%;height:100%;object-fit:contain;display:block;background:#000" />
+      </div>
+
+      <!-- Controls -->
+      <div class="camview-ctrl">
+
+        <!-- Capabilities -->
+        <div class="cv-section">
+          <div class="cv-caps" id="cvCaps"></div>
+        </div>
+
+        <!-- PTZ -->
+        <div class="cv-section" id="cvPtzSection" style="display:none">
+          <div class="cv-section-title"><i class="fa-solid fa-arrows-up-down-left-right"></i> PTZ</div>
+          <div class="cv-ptz">
+            <div class="cv-ptz-row">
+              <button class="cv-ptz-btn" id="ptz-up" title="Yuqori">
+                <i class="fa-solid fa-chevron-up"></i>
+              </button>
+            </div>
+            <div class="cv-ptz-row">
+              <button class="cv-ptz-btn" id="ptz-left" title="Chap">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button class="cv-ptz-btn cv-ptz-home" id="ptz-home" title="Boshlang'ich">
+                <i class="fa-solid fa-house"></i>
+              </button>
+              <button class="cv-ptz-btn" id="ptz-right" title="O'ng">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+            <div class="cv-ptz-row">
+              <button class="cv-ptz-btn" id="ptz-down" title="Quyi">
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zoom -->
+        <div class="cv-section" id="cvZoomSection" style="display:none">
+          <div class="cv-section-title"><i class="fa-solid fa-magnifying-glass"></i> Zoom</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" id="ptz-zin" style="flex:1">
+              <i class="fa-solid fa-magnifying-glass-plus"></i> Katta
+            </button>
+            <button class="btn btn-ghost btn-sm" id="ptz-zout" style="flex:1">
+              <i class="fa-solid fa-magnifying-glass-minus"></i> Kichik
+            </button>
+          </div>
+        </div>
+
+        <!-- IR / Light -->
+        <div class="cv-section" id="cvIrSection" style="display:none">
+          <div class="cv-section-title"><i class="fa-solid fa-lightbulb"></i> IR / Tungi rejim</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm cv-ir-btn" data-action="ir_auto" style="flex:1">
+              <i class="fa-solid fa-a"></i> Auto
+            </button>
+            <button class="btn btn-ghost btn-sm cv-ir-btn" data-action="ir_on" style="flex:1">
+              <i class="fa-solid fa-lightbulb"></i> Yoq
+            </button>
+            <button class="btn btn-ghost btn-sm cv-ir-btn" data-action="ir_off" style="flex:1">
+              <i class="fa-regular fa-lightbulb"></i> O'chir
+            </button>
+          </div>
+        </div>
+
+        <!-- Audio -->
+        <div class="cv-section" id="cvAudioSection" style="display:none">
+          <div class="cv-section-title"><i class="fa-solid fa-microphone"></i> Mikrofon</div>
+          <button class="btn btn-ghost btn-sm" id="cvMicBtn" style="width:100%">
+            <i class="fa-solid fa-microphone"></i> Audio yoqish
+          </button>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="cv-section">
+          <div class="cv-section-title"><i class="fa-solid fa-bolt"></i> Tezkor</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-ghost btn-sm" id="cvSnapshot">
+              <i class="fa-solid fa-camera"></i> Snapshot olish
+            </button>
+            <button class="btn btn-danger btn-sm" id="cvReboot">
+              <i class="fa-solid fa-rotate-right"></i> Kamerani qayta yoqish
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance Edit Modal -->
+<div class="overlay" id="attModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head">
+      <h3>Davomat tahrirlash</h3>
+      <button class="btn-icon close-modal" data-modal="attModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="attId" />
+      <div class="field-row">
+        <div class="field-group">
+          <label>Kelish vaqti</label>
+          <input class="input" type="time" id="attCheckin" />
+        </div>
+        <div class="field-group">
+          <label>Ketish vaqti</label>
+          <input class="input" type="time" id="attCheckout" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Izoh</label>
+        <input class="input" id="attNote" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost close-modal" data-modal="attModal">Bekor</button>
+      <button class="btn btn-primary" id="saveAttBtn">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="/static/js/api.js?v=5"></script>
+<script src="/static/js/ui.js?v=5"></script>
+<script src="/static/js/app.js?v=5"></script>
+</body>
+</html>
