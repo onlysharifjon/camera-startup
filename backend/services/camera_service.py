@@ -216,7 +216,9 @@ class CameraService:
                         frame = cv2.imread(str(f))
                         if frame is None:
                             continue
-                        faces    = face_service.detect_and_recognize(frame)
+                        faces = face_service.detect_and_recognize(frame)
+                        if not faces:
+                            continue
                         snapshot = face_service.save_snapshot(frame, camera_id)
                         ok, buf  = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
                         if ok and self._on_detection_cb:
