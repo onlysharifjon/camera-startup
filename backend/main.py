@@ -18,7 +18,7 @@ from sqlalchemy import select
 from backend.core.config          import settings
 from backend.core.database        import init_db, AsyncSessionLocal
 from backend.models.camera        import Camera
-from backend.routers              import employees, attendance, cameras
+from backend.routers              import employees, attendance, cameras, users
 from backend.services.camera_service     import camera_service
 from backend.services.attendance_service import attendance_service
 from backend.services.face_service       import face_service
@@ -136,6 +136,7 @@ app.add_middleware(
 app.include_router(employees.router, prefix="/api")
 app.include_router(attendance.router, prefix="/api")
 app.include_router(cameras.router,    prefix="/api")
+app.include_router(users.router,      prefix="/api")
 
 # Captures static files
 app.mount("/captures", StaticFiles(directory=str(settings.CAPTURES_DIR)), name="captures")

@@ -20,6 +20,7 @@ class Base(DeclarativeBase):
 async def init_db():
     from backend.models import employee, attendance, camera  # noqa – registers models
     from backend.models.attendance import DetectionLog  # noqa
+    from backend.models import user  # noqa
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
