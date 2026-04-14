@@ -27,4 +27,5 @@ class Employee(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    attendances = relationship("Attendance", back_populates="employee", lazy="select")
+    attendances     = relationship("Attendance",    back_populates="employee", lazy="select")
+    detection_logs  = relationship("DetectionLog", back_populates="employee", lazy="select")
